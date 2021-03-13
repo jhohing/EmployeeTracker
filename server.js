@@ -131,3 +131,85 @@ function viewAllRoles(){
         prompt();
     });
 };
+
+async function addEmployee(){
+    const addName = await inquirer.prompt(askName());
+
+    connection.query("SELECT role.id, role.title FROM role ORDER BY role.id", async (err, results) => {
+        if(err) throw err;
+        const { role } = await inquirer.prompt([
+            {
+                name: "role",
+                type: "list",
+                choices: () => results.map(results => results.title),
+                message: "What is the role for this employee?"
+            }
+        ]);
+        let roleId;
+        for (const row of results){
+            if(row.title === role){
+                roleId = row.id;
+                continue;
+            }
+        }
+        connection.query("SELECT * FROM employee", async(err, results) => {
+            if(err) throw err;
+            let choices = results.map(results => `${results.first_name} ${results.last_name}`);
+            choices.push("none");
+            let { manager } = await inquirer.prompt([
+                {
+                    name: "manager",
+                    type: "list",
+                    choices: choices,
+                    message: "Choose the manager for this employee: "
+                }
+            ]);
+            let managerID;
+            let managerName;
+            if(manager === "none"){
+                managerID = null;
+            }
+            else {
+                for(const data of results) {
+                    data.fullName = `${data.first_name} ${data.last_name}`;
+                    if(data.fullName === manager){
+                        managerId = data.id;
+                        managerName = data.fullName;
+                        console.log(managerId);
+                        console.log(managerName);
+                        continue;
+                    }
+                }
+            }
+            console.log("Employee has been added.");
+            connection.query(
+                "INSERT INTO employee SET ?",
+                {
+                    first_name: addName.first,
+                    last_name: addName.last,
+                    role_id: roleId,
+                    manager_id: parseInt(managerId)
+                },
+                (err, results) => {
+                    if(err) throw err;
+                    prompt();
+                }
+            );
+        });
+    });
+};
+
+function askName() {
+    return ([
+        {
+            name: "first",
+            type: "input",
+            message: "Enter the first name: "
+        },
+        {
+            name: "last",
+            type: "input",
+            message: "Enter the last name: "
+        }
+    ]);
+}
