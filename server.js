@@ -5,7 +5,7 @@ const cTable = require("console.table");
 const promptMessages = {
     viewAllEmployees: "View All Employees",
     viewByDepartment: "View All Employees By Department",
-    viewManager: "View All Employees By Manager",
+    viewByManager: "View All Employees By Manager",
     addEmployee: "Add An Employee",
     removeEmployee: "Remove An Employee",
     updatedRole: "Update Employee Role",
@@ -35,7 +35,7 @@ function prompt(){
         choices: [
             promptMessages.viewAllEmployees,
             promptMessages.viewByDepartment,
-            promptMessages,viewManager,
+            promptMessages,viewByManager,
             promptMessages.viewAllRoles,
             promptMessages.addEmployee,
             promptMessages.removeEmployee,
@@ -52,8 +52,8 @@ function prompt(){
             case promptMessages.viewByDepartment:
                 viewByDepartment();
                 break;
-            case promptMessages.viewManager:
-                viewManager();
+            case promptMessages.viewByManager:
+                viewByManager();
                 break
             case promptMessages.viewAllRoles:
                 viewAllRoles();
@@ -94,10 +94,40 @@ function viewByDepartment() {
     FROM employee emp
     LEFT JOIN role ON role.id = emp.role_id
     LEFT JOIN department dept ON dept.id = role.department_id
-    ORDER BY emp.id`
+    ORDER BY department`
 
     connection.query(query, (err,results) => {
         if(err) throw err;
         console.table(results);
+        prompt();
     })
+};
+
+function viewByManager() {
+    const query = `SELECT CONCAT(mngr.first_name, " ", mngr.last_name) AS manager, dept.name AS department, emp.id, emp.first_name, emp.last_name, role.title
+    FROM employee emp
+    LEFT JOIN employee mngr ON mngr.id = emp.manager_id
+    INNER JOIN role ON role.id = emp.role_id
+    INNER JOIN department dept ON dept.id = role.department_id
+    ORDER BY manager`
+
+    connection.query(query, (err,results) => {
+        if(err) throw err;
+        console.table(results);
+        prompt();
+    });
+};
+
+function viewAllRoles(){
+    const query = `SELECT role.title, emp.id, emp.first_name, emp.last_name, dept.name AS department
+    FROM employee emp
+    LEFT JOIN role ON role.id = emp.role_id
+    LEFT JOIN department dept ON dept.id = role.department_id
+    ORDER BY role.title`
+
+    connection.query(query, (err, results) => {
+        if(err) throw err;
+        console.table(results);
+        prompt();
+    });
 };
