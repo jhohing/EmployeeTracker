@@ -5,7 +5,7 @@ An application ran from the terminal that allows business owner to view and mana
 
 Below is a gif of the application:
 
-![Employee Tracker] (./assets/employeeTracker.gif)
+![Employee Tracker](./assets/employeeTracker.gif)
 
 You can find a full video displaying the full functionality of the application [here](./assets/employeeTracker.webm)
 
